@@ -741,3 +741,15 @@ input.ep-field{ min-width: 50%;}
 .thumbnail.icon img {
     width: 101%;
 } 
+
+
+.input-group {
+    position: relative;
+    display: table;
+    border-collapse: separate;
+    margin-top: 3px;
+}
+
+#mainLoginForm {
+    max-width: 100%;
+}
