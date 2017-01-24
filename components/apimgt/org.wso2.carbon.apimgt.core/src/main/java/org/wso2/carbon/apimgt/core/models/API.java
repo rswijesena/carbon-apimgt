@@ -284,6 +284,7 @@ public final class API {
         private String id;
         private String provider;
         private String name;
+        private String permission;
 
         public String getId() {
             return id;
@@ -668,6 +669,12 @@ public final class API {
             return this;
         }
 
+        public APIBuilder permission(String permission) {
+            this.permission = permission;
+            return this;
+        }
+
+
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
@@ -884,6 +891,14 @@ public final class API {
 
         public Map getPermissionMap() {
             return permissionMap;
+        }
+
+        public String getPermission() {
+            return permission;
+        }
+
+        public void setPermission(String permission) {
+            this.permission = permission;
         }
     }
 
