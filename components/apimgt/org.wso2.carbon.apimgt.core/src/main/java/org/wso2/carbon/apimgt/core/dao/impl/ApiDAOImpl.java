@@ -386,12 +386,12 @@ public class ApiDAOImpl implements ApiDAO {
                     addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
                 }
 
-                String wsdlUri = api.getWsdlUri();
-
-                if (wsdlUri != null) {
-                    ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
-                            ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri);
-                }
+//                String wsdlUri = api.getWsdlUri();
+//
+//                if (wsdlUri != null) {
+//                    ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
+//                            ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri);
+//                }
                 addTagsMapping(connection, apiPrimaryKey, api.getTags());
 /*
                 addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig());
