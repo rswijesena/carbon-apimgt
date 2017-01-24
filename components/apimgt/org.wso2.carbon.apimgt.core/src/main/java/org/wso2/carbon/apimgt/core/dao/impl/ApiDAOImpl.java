@@ -474,6 +474,9 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 }
 
+                deleteAPIPermission(connection, apiID);
+                addAPIPermission(connection,  substituteAPI.getPermissionMap(), apiID);
+
                 deleteTransports(connection, apiID);
                 addTransports(connection, apiID, substituteAPI.getTransport());
 
@@ -1100,6 +1103,31 @@ public class ApiDAOImpl implements ApiDAO {
             }
             statement.executeBatch();
 
+        }
+    }
+    
+
+    private void deleteAPIPermission(Connection connection, String apiID) throws SQLException {
+        final String query = "DELETE FROM AM_API_GROUP_PERMISSION WHERE API_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+        }
+    }
+
+    private void addAPIPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+        final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap.size() > 0) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                    statement.setString(1, apiId);
+                    statement.setString(2, entry.getKey());
+                    statement.setInt(3, entry.getValue());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
         }
     }
 
