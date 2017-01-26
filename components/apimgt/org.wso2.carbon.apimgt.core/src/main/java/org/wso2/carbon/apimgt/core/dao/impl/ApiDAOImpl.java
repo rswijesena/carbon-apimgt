@@ -401,6 +401,7 @@ public class ApiDAOImpl implements ApiDAO {
                 addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
                 addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
                 addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition());
+                addAPIPermission(connection,  api.getPermissionMap(), apiPrimaryKey);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -477,7 +478,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 deleteAPIPermission(connection, apiID);
-                addAPIPermission(connection,  substituteAPI.getPermissionMap(), apiID);
+                updateApiPermission(connection, substituteAPI.getPermissionMap(), apiID);
 
                 deleteTransports(connection, apiID);
                 addTransports(connection, apiID, substituteAPI.getTransport());
@@ -1120,15 +1121,53 @@ public class ApiDAOImpl implements ApiDAO {
     private void addAPIPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
         final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
         Map<String, Integer> map = permissionMap;
-        if (permissionMap.size() > 0) {
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                    statement.setString(1, apiId);
-                    statement.setString(2, entry.getKey());
-                    statement.setInt(3, entry.getValue());
-                    statement.addBatch();
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, apiId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < 4 && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + 4);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
                 }
-                statement.executeBatch();
+            }
+        } else {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, apiId);
+                statement.setString(2, "EVERYONE");
+                statement.setInt(3, 7);
+                statement.execute();
+            }
+        }
+
+    }
+
+    private void updateApiPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+        final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
+        Map<String, Integer> map = permissionMap;
+        if (permissionMap != null) {
+            if (permissionMap.size() > 0) {
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                        statement.setString(1, apiId);
+                        statement.setString(2, entry.getKey());
+                        //if permission value is UPDATE or DELETE we by default give them read permission also.
+                        if (entry.getValue() < 4 && entry.getValue() != 0) {
+                            statement.setInt(3, entry.getValue() + 4);
+                        } else {
+                            statement.setInt(3, entry.getValue());
+                        }
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
             }
         }
     }
