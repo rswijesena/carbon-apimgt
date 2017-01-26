@@ -235,6 +235,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
+                if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                    HashMap roleNamePermissionList;
+                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                    apiBuilder.permissionMap(roleNamePermissionList);
+                }
+
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
                 getApiDAO().addAPI(createdAPI);
@@ -250,6 +256,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (LifecycleException e) {
+            String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        } catch (ParseException e) {
             String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
@@ -287,9 +297,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
-                    HashMap roleNamePermissionList;
-                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
-                    apiBuilder.permissionMap(roleNamePermissionList);
+                    if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                        HashMap roleNamePermissionList;
+                        roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                        apiBuilder.permissionMap(roleNamePermissionList);
+                    }
 
                     API api = apiBuilder.build();
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
